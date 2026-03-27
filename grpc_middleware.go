@@ -8,23 +8,33 @@ import (
 	"google.golang.org/grpc"
 )
 
-var grpcRequestDuration = NewHistogramVec(
-	HistogramOpts{
-		Name:    "grpc_request_duration_seconds",
-		Help:    "gRPC request duration in seconds",
-		Buckets: []float64{0.01, 0.05, 0.1, 0.5, 1},
-	},
-	[]string{"service", "method", "is_error"},
+var (
+	grpcRequestsTotal = NewCounterVec(
+		CounterOpts{
+			Name: "grpc_requests_total",
+			Help: "Total number of gRPC requests",
+		},
+		[]string{"service", "method", "is_error"},
+	)
+
+	grpcRequestDuration = NewHistogramVec(
+		HistogramOpts{
+			Name:    "grpc_request_duration_seconds",
+			Help:    "gRPC request duration in seconds",
+			Buckets: []float64{0.01, 0.05, 0.1, 0.5, 1, 2, 5},
+		},
+		[]string{"service", "method", "is_error"},
+	)
 )
 
-// measureGRPCRequestDuration records the duration of gRPC requests.
-func measureGRPCRequestDuration(serviceName, method string, isErr bool, start time.Time) {
-	grpcRequestDuration.
-		WithLabelValues(serviceName, method, strconv.FormatBool(isErr)).
-		Observe(time.Since(start).Seconds())
+func measureGRPCRequest(serviceName, method string, isErr bool, start time.Time) {
+	isErrorStr := strconv.FormatBool(isErr)
+	labels := []string{serviceName, method, isErrorStr}
+	grpcRequestsTotal.WithLabelValues(labels...).Inc()
+	grpcRequestDuration.WithLabelValues(labels...).Observe(time.Since(start).Seconds())
 }
 
-// RequestDurationMetricUnaryServerInterceptor tracks gRPC request duration.
+// RequestDurationMetricUnaryServerInterceptor tracks gRPC request duration and count.
 func RequestDurationMetricUnaryServerInterceptor(serviceName string) grpc.UnaryServerInterceptor {
 	return func(
 		ctx context.Context,
@@ -34,7 +44,7 @@ func RequestDurationMetricUnaryServerInterceptor(serviceName string) grpc.UnaryS
 	) (resp interface{}, err error) {
 		start := time.Now()
 		defer func() {
-			measureGRPCRequestDuration(serviceName, info.FullMethod, err != nil, start)
+			measureGRPCRequest(serviceName, info.FullMethod, err != nil, start)
 		}()
 		return handler(ctx, req)
 	}

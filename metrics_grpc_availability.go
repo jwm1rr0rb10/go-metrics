@@ -49,14 +49,22 @@ func NewGRPCConnectionMonitor(
 	}
 }
 
+// IsAvailable returns the current connection status.
+func (s *GRPCConnectionMonitor) IsAvailable() bool {
+	return atomic.LoadInt32(&s.available) == 1
+}
+
 // Start begins health checks.
 func (s *GRPCConnectionMonitor) Start(ctx context.Context) {
+	ctx, cancel := context.WithCancel(ctx)
+	s.cancel = cancel
+
 	healthClient := grpc_health_v1.NewHealthClient(s.service.Connection())
 	gRPCConnectionAvailability.WithLabelValues(s.serviceFrom, s.serviceTo).Set(0)
 
 	checkConnection := func() {
-		ctxCheck, cancel := context.WithTimeout(ctx, 2*time.Second)
-		defer cancel()
+		ctxCheck, cancelCheck := context.WithTimeout(ctx, 2*time.Second)
+		defer cancelCheck()
 
 		check, err := healthClient.Check(ctxCheck, &grpc_health_v1.HealthCheckRequest{})
 		status := grpc_health_v1.HealthCheckResponse_NOT_SERVING
@@ -76,7 +84,7 @@ func (s *GRPCConnectionMonitor) Start(ctx context.Context) {
 	ticker := time.NewTicker(s.pingTimer)
 	go func() {
 		defer ticker.Stop()
-		checkConnection()
+		checkConnection() // initial check
 		for {
 			select {
 			case <-ctx.Done():
@@ -92,6 +100,7 @@ func (s *GRPCConnectionMonitor) Start(ctx context.Context) {
 func (s *GRPCConnectionMonitor) Close() error {
 	if s.cancel != nil {
 		s.cancel()
+		s.cancel = nil
 	}
 	return nil
 }
