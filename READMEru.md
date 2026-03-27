@@ -208,7 +208,7 @@ metrics.SetRegisterer(myCustomRegisterer)
 
 Лицензия
 
-[MIT License]() – © Raman Zaitsau [@jwm1rrr0rb10](https://github.com/jwm1rr0rb10)
+[MIT License](https://github.com/jwm1rr0rb10/go-metrics/blob/main/LICENSE) – © Raman Zaitsau [@jwm1rrr0rb10](https://github.com/jwm1rr0rb10)
 
 
 🙌 Contributions
