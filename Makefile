@@ -16,10 +16,3 @@ tags:
 			echo "⚠️  Tag $$tag already exists"; \
 		fi \
 	'
-.PHONY: init
-init:
-	@for name in $(NAMES); do \
-  	  echo $$name && \
-	  cd $$name && \
-	  go mod init github.com/jwm1rr0rb10/go-metrics/$$name || true && go mod tidy || true && go get -u ./... && cd ..; \
-  	done
