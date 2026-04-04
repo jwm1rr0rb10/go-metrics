@@ -15,11 +15,6 @@ const (
 	defaultReadHeaderTimeout = 5 * time.Second
 )
 
-var (
-	ErrEmptyHost = errors.New("host cannot be empty")
-	ErrZeroPort  = errors.New("port cannot be zero")
-)
-
 // Config defines the metrics server configuration.
 type Config struct {
 	address           string

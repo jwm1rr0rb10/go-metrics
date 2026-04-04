@@ -5,28 +5,10 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
-var (
-	// Registerer allows custom metric registration.
-	Registerer = prometheus.DefaultRegisterer
-)
-
 // SetRegisterer sets a custom Prometheus registerer.
 func SetRegisterer(r prometheus.Registerer) {
 	Registerer = r
 }
-
-// Metric types (aliases from Prometheus).
-type (
-	CounterOpts   = prometheus.CounterOpts
-	GaugeOpts     = prometheus.GaugeOpts
-	HistogramOpts = prometheus.HistogramOpts
-	Counter       = prometheus.Counter
-	CounterVec    = prometheus.CounterVec
-	Gauge         = prometheus.Gauge
-	GaugeVec      = prometheus.GaugeVec
-	Histogram     = prometheus.Histogram
-	HistogramVec  = prometheus.HistogramVec
-)
 
 // NewCounter creates a Counter metric.
 func NewCounter(opts CounterOpts) Counter {
