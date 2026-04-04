@@ -3,8 +3,6 @@ package metrics
 import (
 	"fmt"
 	"time"
-
-	"github.com/jwm1rr0rb10/go-errors"
 )
 
 const (
