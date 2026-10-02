@@ -1,6 +1,18 @@
 NAMES=go-metrics
 
-.PHONY: tags
+.PHONY: tags test lint bench vuln
+
+test:
+	go test -race -count=1 -cover ./...
+
+lint:
+	golangci-lint run ./...
+
+bench:
+	go test -run='^$$' -bench=. -benchmem ./...
+
+vuln:
+	go run golang.org/x/vuln/cmd/govulncheck@latest ./...
 
 tags:
 	@bash -c ' \
