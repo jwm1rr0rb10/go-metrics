@@ -1,0 +1,22 @@
+version: "2"
+
+linters:
+  enable:
+    - bodyclose
+    - errorlint
+    - gocritic
+    - misspell
+    - noctx
+    - revive
+    - unconvert
+    - unparam
+
+  exclusions:
+    rules:
+      - path: _test\.go
+        linters: [noctx, errcheck]
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
